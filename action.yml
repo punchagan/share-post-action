@@ -23,7 +23,7 @@ runs:
       id: generate_announcement_text
       run: |
         ANNOUNCEMENT_TEXT=$("$GITHUB_ACTION_PATH/generate_announcement_text.sh" "${{ inputs.base_url }}" "${{ inputs.announcement_template }}" "${{ inputs.post_subdirectory }}")
-        echo "::set-output name=announcement_text::$ANNOUNCEMENT_TEXT"
+        echo "announcement_text=$ANNOUNCEMENT_TEXT" >> $GITHUB_OUTPUT
       shell: bash
     - name: Tweet
       if: success() && steps.generate_announcement_text.outputs.announcement_text != '' && env.TWITTER_API_KEY != '' && env.TWITTER_API_SECRET_KEY != '' && env.TWITTER_ACCESS_TOKEN != '' && env.TWITTER_ACCESS_TOKEN_SECRET != ''
