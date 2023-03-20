@@ -17,6 +17,8 @@ runs:
   steps:
     - name: Checkout Repository
       uses: actions/checkout@v2
+      with:
+        fetch-depth: 2
     - name: Generate Announcement Text
       id: generate_announcement_text
       run: |
