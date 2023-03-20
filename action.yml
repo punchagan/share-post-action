@@ -1,0 +1,39 @@
+name: 'Share Post'
+description: 'Announce new blog posts on Twitter and Mastodon for Hugo or other static site generator content repositories'
+inputs:
+  base_url:
+    description: 'The base URL of your website'
+    required: true
+  announcement_template:
+    description: 'The template for the announcement text. Use {{TITLE}}, {{POST_URL}}, {{TAGS}}, and {{DESCRIPTION}} as placeholders.'
+    required: false
+    default: 'New blog post: {{TITLE}} - {{POST_URL}} {{TAGS}}'
+  post_subdirectory:
+    description: 'The subdirectory inside the content folder that contains the blog posts'
+    required: false
+    default: 'posts'
+runs:
+  using: 'composite'
+  steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+    - name: Generate Announcement Text
+      id: generate_announcement_text
+      run: |
+        ANNOUNCEMENT_TEXT=$("$GITHUB_ACTION_PATH/generate_announcement_text.sh" "${{ inputs.base_url }}" "${{ inputs.announcement_template }}" "${{ inputs.post_subdirectory }}")
+        echo "::set-output name=announcement_text::$ANNOUNCEMENT_TEXT"
+      shell: bash
+    - name: Tweet
+      if: success() && steps.generate_announcement_text.outputs.announcement_text != '' && env.TWITTER_API_KEY != '' && env.TWITTER_API_SECRET_KEY != '' && env.TWITTER_ACCESS_TOKEN != '' && env.TWITTER_ACCESS_TOKEN_SECRET != ''
+      uses: ethomson/send-tweet-action@v1
+      with:
+        status: ${{ steps.generate_announcement_text.outputs.announcement_text }}
+        consumer-key: ${{ env.TWITTER_API_KEY }}
+        consumer-secret: ${{ env.TWITTER_API_SECRET_KEY }}
+        access-token: ${{ env.TWITTER_ACCESS_TOKEN }}
+        access-token-secret: ${{ env.TWITTER_ACCESS_TOKEN_SECRET }}
+    - name: Toot
+      if: success() && steps.generate_announcement_text.outputs.announcement_text != '' && env.MASTODON_INSTANCE != '' && env.MASTODON_ACCESS_TOKEN != ''
+      run: |
+        curl -X POST -H "Authorization: Bearer ${{ env.MASTODON_ACCESS_TOKEN }}" -d "status=${{ steps.generate_announcement_text.outputs.announcement_text }}" "${{ env.MASTODON_INSTANCE }}/api/v1/statuses"
+      shell: bash
