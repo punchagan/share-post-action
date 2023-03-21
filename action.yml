@@ -11,7 +11,7 @@ inputs:
   announcement_template:
     description: 'The template for the announcement text. Use {{TITLE}}, {{POST_URL}}, {{TAGS}}, and {{DESCRIPTION}} as placeholders.'
     required: false
-    default: 'New blog post: {{TITLE}} - {{POST_URL}} {{TAGS}}'
+    default: 'New blog post: {{TITLE}}\\n{{DESCRIPTION}}\\n{{POST_URL}}\\n{{TAGS}}'
   post_subdirectory:
     description: 'The subdirectory inside the content folder that contains the blog posts'
     required: false
