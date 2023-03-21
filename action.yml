@@ -27,8 +27,8 @@ runs:
       id: generate_announcement_text
       run: |
         ANNOUNCEMENT_TEXT=$("$GITHUB_ACTION_PATH/generate_announcement_text.sh" "${{ inputs.base_url }}" "${{ inputs.announcement_template }}" "${{ inputs.post_subdirectory }}")
+        echo "{\"status\": \"$ANNOUNCEMENT_TEXT\"}" >> announcement.json
         echo "announcement_text=$ANNOUNCEMENT_TEXT" >> $GITHUB_OUTPUT
-        echo "Announcement text generated:\n\n$ANNOUNCEMENT_TEXT"
       shell: bash
     - name: Tweet
       if: success() && steps.generate_announcement_text.outputs.announcement_text != '' && env.TWITTER_API_KEY != '' && env.TWITTER_API_SECRET_KEY != '' && env.TWITTER_ACCESS_TOKEN != '' && env.TWITTER_ACCESS_TOKEN_SECRET != ''
@@ -42,5 +42,5 @@ runs:
     - name: Toot
       if: success() && steps.generate_announcement_text.outputs.announcement_text != '' && env.MASTODON_INSTANCE != '' && env.MASTODON_ACCESS_TOKEN != ''
       run: |
-        curl -X POST -H "Authorization: Bearer ${{ env.MASTODON_ACCESS_TOKEN }}" -d "status=${{ steps.generate_announcement_text.outputs.announcement_text }}" "${{ env.MASTODON_INSTANCE }}/api/v1/statuses"
+        curl -X POST -H "Authorization: Bearer ${{ env.MASTODON_ACCESS_TOKEN }}" -H "Content-Type: application/json; charset=utf-8" -d @announcement.json "${{ env.MASTODON_INSTANCE }}/api/v1/statuses"
       shell: bash
