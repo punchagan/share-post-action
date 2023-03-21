@@ -1,5 +1,9 @@
 name: 'Share Post'
 description: 'Announce new blog posts on Twitter and Mastodon for Hugo or other static site generator content repositories'
+author: 'punchagan'
+branding:
+  icon: 'share-2'
+  color: 'orange'
 inputs:
   base_url:
     description: 'The base URL of your website'
